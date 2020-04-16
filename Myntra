@@ -1,0 +1,118 @@
+package selenium.practice;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+
+public class Myntra {
+
+	public static void main(String[] args) throws InterruptedException {
+		
+//Launch Browser
+		System.setProperty("webdriver.chrome.driver", "./Drivers/chromedriver.exe");
+		ChromeDriver driver = new ChromeDriver();
+		driver.manage().window().maximize();
+		driver.get("https://www.myntra.com/");
+		driver.manage().timeouts().implicitlyWait(30,TimeUnit.SECONDS);
+		
+//mouseHover on Women and click Jackets & Coats
+		WebElement womenMouseHover = driver.findElementByXPath("(//a[text()='Women'])[1]");
+		Actions builder = new Actions(driver);
+		builder.moveToElement(womenMouseHover).perform();
+		driver.findElementByXPath("//a[text()='Jackets & Coats']").click();
+		
+//To disable the notification
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--disable-notifications");
+				
+//Find the total count
+		String strItemCnt = driver.findElementByXPath("//div[@class='title-container']").getText().replaceAll("\\D", "");
+		int totalCount = Integer.parseInt(strItemCnt);
+		System.out.println("Total cost: "+totalCount);
+		
+//Find the count of Jackets
+		String jackets = driver.findElementByXPath("//label[text()='Jackets']").getText().replaceAll("\\D", "");
+		int jacketsCount = Integer.parseInt(jackets);
+		System.out.println("Jacket Cost:" +jacketsCount);
+		
+//Find the count of Coats
+		String coats = driver.findElementByXPath("//label[text()='Coats']").getText().replaceAll("\\D", "");
+		int coatsCount = Integer.parseInt(coats);
+		System.out.println("Coat Cost:" +coatsCount);
+		
+//validate if the sum of Jackets + Coats = Total
+		if(totalCount==jacketsCount+coatsCount)
+		{
+			System.out.println("Total count matches with sum");
+		}
+		else
+		{
+			System.out.println("Total Count is not matching");
+		}
+		
+//Click the coats checkbox
+		driver.findElementByXPath("//label[text()='Coats']").click();
+		
+//Click Brand more option
+		driver.findElementByXPath("//div[@class='brand-more']").click();
+		
+//Type MANGO in Text Box
+		driver.findElementByXPath("//input[@class='FilterDirectory-searchInput']").sendKeys("MANGO");
+		
+//Check MANGO
+		driver.findElementByXPath("(//input[@value='MANGO']/parent::label)[2]").click();
+		
+//Close the X
+		driver.findElementByXPath("//span[@class='myntraweb-sprite FilterDirectory-close sprites-remove']").click();
+		
+//Check whether all the selected brand is same
+		int count =0;
+		List<WebElement> brandNames = driver.findElementsByXPath("//h3[text()='MANGO']");
+		int brandSize = brandNames.size();
+		for (WebElement brand : brandNames) {
+			String text = brand.getText();
+			if(text.equalsIgnoreCase("MANGO"))
+			{
+				count =count+1;
+			}
+		}
+		if(count==brandSize)
+		{
+			System.out.println("All selected Brands are MANGO");
+		}
+		else
+		{
+			System.out.println("Not Mango Product");
+		}
+		
+//sort by Better Discount
+		WebElement mouseHoverSortby = driver.findElementByXPath("//div[text()='Sort by : ']");
+		Actions builder1 = new Actions(driver);
+		builder1.moveToElement(mouseHoverSortby).perform();
+		
+//Click on Sort By
+		driver.findElementByXPath("//label[text()='Better Discount']").click();
+		
+//Find the price of first displayed item
+		List<WebElement> firstBetterPrice = driver.findElementsByXPath("//span[@class='product-discountedPrice'][1]");
+		String ele1 = firstBetterPrice.get(0).getText();
+		System.out.println("The first better price coat is:" +ele1);
+		
+//Mousehover on size
+		WebElement mouseHoverSize = driver.findElementByXPath("(//h4[@class='product-product'])[1]");
+		Actions size = new Actions(driver);
+		size.moveToElement(mouseHoverSize).perform();
+		
+//Click on wishlist and verify Login page is displayed		
+		driver.findElementByXPath("//div[contains(@class,'product-actions')]/span/span").click();
+		String pageTitle = driver.getTitle();
+		System.out.println("Back to Login:" +pageTitle);
+		
+//Close Browser
+		driver.close();
+	}
+
+}
