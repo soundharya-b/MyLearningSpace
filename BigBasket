@@ -1,0 +1,123 @@
+package selenium.practice;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class BigBasket {
+
+	public static void main(String[] args) throws InterruptedException {
+		
+		System.setProperty("webdriver.chrome.driver", "./Drivers/chromedriver.exe");
+		ChromeDriver driver = new ChromeDriver();
+		ChromeOptions option = new ChromeOptions();
+		option.addArguments("--disable notifications");
+		driver.manage().window().maximize();
+		driver.get("https://www.bigbasket.com/");
+		driver.manage().timeouts().implicitlyWait(50,TimeUnit.SECONDS);
+		
+		//mouse over on  Shop by Category 
+		WebElement categoryMouseHover = driver.findElementByXPath("(//a[text()=' Shop by Category '])[1]");
+		Actions builder = new Actions(driver);
+		builder.moveToElement(categoryMouseHover).perform();
+		Thread.sleep(1000);
+		
+		//Go to FOODGRAINS, OIL & MASALA --> RICE & RICE PRODUCTS 
+		WebElement foodMouseHover = driver.findElementByLinkText("Foodgrains, Oil & Masala");
+		Actions builder1 = new Actions(driver);
+		builder1.moveToElement(foodMouseHover).perform();
+		Thread.sleep(1000);
+		
+	
+		WebElement riceMouseHover = driver.findElementByLinkText("Rice & Rice Products");
+		Actions builder2 = new Actions(driver);
+		builder2.moveToElement(riceMouseHover).perform();
+		Thread.sleep(3000);
+		
+		//Click on Boiled & Steam Rice
+		driver.findElementByXPath("(//a[@ng-href='/pc/foodgrains-oil-masala/rice-rice-products/boiled-steam-rice/?nc=nb'])[2]").click();
+		Thread.sleep(1000);
+		
+		//Choose the Brand as bb Royal
+		driver.findElementByXPath("(//span[text()='bb Royal'])[1]").click();
+		Thread.sleep(1000);
+		
+		//Go to Ponni Boiled Rice - Super Premium and select 5kg bag from Dropdown
+		driver.findElementByXPath("(//button[@data-toggle='dropdown']//i)[1]").click();
+		Thread.sleep(1000);
+		
+		//Print the Price of Rice
+		String getPrice = driver.findElementByXPath("//a[text()='Ponni Boiled Rice - Super Premium']//parent::div/following-sibling::div[2]/div/div/h4/span[2]/span").getText();
+		//int price = Integer.parseInt(getPrice);
+		System.out.println("The Price is:" +getPrice);
+		
+		//Click the Add button
+		driver.findElementByXPath("(//button[@qa='add'])[1]").click();
+		Thread.sleep(1000);
+		
+		//handle pop up
+		driver.findElementByXPath("(//a[@qa='continueBtn'])[1]").click();
+		
+		//Verify the success message displayed
+		WebElement successMsg = driver.findElementByXPath("//div[text()='Successfully added Ponni Boiled Rice/Puzhungal Arisi 25 kg to the basket']");
+		System.out.println(successMsg.getText());
+		
+		//Type Dal in Search field and enter
+		driver.findElementByXPath("(//div[@class='input-group'])[1]/input").sendKeys("Dal",Keys.ENTER);
+		Thread.sleep(5000);
+		
+		//Go to Toor/Arhar Dal and Select 2kg and set Qty as 2
+		String dal ="Toor/Arhar Dal/Thuvaram Paruppu";
+		driver.findElementByXPath("//a[text()='"+dal+"']/parent::div//following-sibling::div//button").click();
+		driver.findElementByXPath("//a[text()='Toor/Arhar Dal/Thuvaram Paruppu']/parent::div//following-sibling::div//ul/li[4]").click();
+		System.out.println("Dal Quantity selected as 2kg");
+		driver.findElementByXPath("//a[text()='"+dal+"']/parent::div/following-sibling::div[2]//div[3]//input").clear();
+		driver.findElementByXPath("//a[text()='"+dal+"']/parent::div/following-sibling::div[2]//div[3]//input").sendKeys("2");
+		System.out.println("2 Dal products selected");
+		
+		//Print Dal Price
+		int dalPrice = Integer.parseInt(driver.findElementByXPath("(((//a[text()='"+dal+"']//parent::div)//following-sibling::div)[2])//span[@class='discnt-price']/span").getText());
+		System.out.println("Dal price is : "+dalPrice);
+		
+		// Click Add button
+		driver.findElementByXPath("(((//a[text()='Toor/Arhar Dal/Thuvaram Paruppu']//parent::div)//following-sibling::div)[2])//button[text()='Add ']").click();
+		Thread.sleep(500);
+		System.out.println(driver.findElementByXPath("//div[@class='toast toast-success']//div").getText());
+		
+		//Mouse hover on My Basket
+		WebElement myBasket = driver.findElementByXPath("//a[@qa='myBasket']");
+		builder.moveToElement(myBasket).perform();
+		
+		//Validate the Sub Total displayed for the selected items
+		Thread.sleep(2000);
+		WebDriverWait wait = new WebDriverWait(driver,10);
+		wait.until(ExpectedConditions.visibilityOf(driver.findElementByXPath("//span[@ng-bind='vm.cart.cart_total']")));
+		String subtotal = driver.findElementByXPath("//span[@ng-bind='vm.cart.cart_total']").getText();
+		double subtotalno = Double.parseDouble(subtotal);
+
+		//Validate the Sub Total for the current items
+		List<WebElement> no = driver.findElementsByXPath("//input[@ng-model='cartItem.quantity']");
+		double actualvalue = cal(driver, no);
+		if (subtotalno == actualvalue) {
+			System.out.println("Subtotal is correct");
+		} else {
+			System.out.println("Subtotal is not correct");
+		}
+
+		//Close the Browser
+		driver.quit();		
+		}
+
+	  private static double cal(ChromeDriver driver, List<WebElement> no) {
+		return 0;
+	}
+
+}
