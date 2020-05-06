@@ -1,0 +1,185 @@
+package selenium.practice;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.UnexpectedAlertBehaviour;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class Ajio {
+
+	public static void main(String[] args) throws InterruptedException {
+		// Launch Browser
+
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--disable-notifications");
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+		System.setProperty("webdriver.chrome.driver", "./Drivers/chromedriver.exe");
+		ChromeDriver driver = new ChromeDriver();
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+
+		DesiredCapabilities cap = new DesiredCapabilities();
+		cap.setCapability(CapabilityType.UNEXPECTED_ALERT_BEHAVIOUR, UnexpectedAlertBehaviour.DISMISS);
+		options.merge(cap);
+		driver.get("https://www.ajio.com/shop/sale");
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		String title = driver.getTitle();
+		if (title.contains("Ajio"))
+			System.out.println("Browser launched successfully: " + title);
+		else
+			System.out.println("Browser launch failed");
+
+		// Enter Bags in the Search field and Select Bags in Women Handbags
+		wait.until(ExpectedConditions.elementToBeClickable(driver.findElementByXPath("//input[@placeholder='Search AJIO']")));
+		driver.findElementByXPath("//input[@placeholder='Search AJIO']").sendKeys("Bags");
+		Thread.sleep(1000);
+		driver.findElementByXPath("//span[text()='Women Handbags']/parent::a").click();
+
+		// Click on five grid and Select SORT BY as "What's New"
+		driver.findElementByXPath("//div[@class='five-grid']/parent::div").click();
+		// Use dropdown Class
+		WebElement sortBy = driver.findElementByXPath("//div[@class='filter-dropdown']//select[1]");
+		Select drp1 = new Select(sortBy);
+		drp1.selectByVisibleText("What's New");
+		System.out.println("Grid selected as Five and Sorted by What's New");
+
+		// Enter Price Range Min as 2000 and Max as 5000
+		driver.findElementByXPath("//span[text()='price']").click();
+		driver.findElementById("minPrice").sendKeys("2000");
+		driver.findElementById("maxPrice").sendKeys("5000");
+		driver.findElementByXPath("//button[@class='rilrtl-button ic-toparw']").click();
+		System.out.println("Price range set between 2000 and 5000");
+
+		// Click on the product "Puma Ferrari LS Shoulder Bag"
+		Thread.sleep(2000);
+		wait.until(ExpectedConditions.elementToBeClickable(driver.findElementByXPath("//div[text()='Ferrari LS Shoulder Bag']/ancestor::div[2]")));
+		JavascriptExecutor executor =(JavascriptExecutor) driver;
+		executor.executeScript("arguments[0].click();",driver.findElementByXPath("//div[text()='Ferrari LS Shoulder Bag']/ancestor::div[2]"));
+
+		// Switch to new window
+		Set<String> winSet = driver.getWindowHandles();
+		List<String> winList = new ArrayList<String>(winSet);
+		driver.switchTo().window(winList.get(1));
+
+		// get Title
+		String pageTitle = driver.getTitle();
+		System.out.println(pageTitle);
+
+		/*
+		 * Verify the Coupon code for the price above 2690 is applicable for your
+		 * product, if applicable the get the Coupon Code and Calculate the discount
+		 * price for the coupon
+		*/
+		int couponAmount = 0;
+		String bagPrice = driver.findElementByXPath("//div[@class='prod-price-section']//div[1]").getText();
+		int currentbagPrice = Integer.parseInt(bagPrice.replaceAll("\\D", ""));
+
+		if (currentbagPrice >= 2690) {
+
+			Thread.sleep(1000);
+			if (driver.findElementByXPath("//div[@class='promo-desc']").getText()
+					.contains("Extra Upto 28% Off on 2690 and Above ")) {
+				String couponTitle = driver.findElementByClassName("promo-title").getText();
+				System.out.println("Coupon Code Applicable :" + couponTitle);
+			} else {
+				System.out.println("Coupon Code Not Applicable");
+			}
+		} else {
+
+			String discountedPrice = driver.findElementByXPath("//div[text()='Get it for ']/span").getText();
+			int discPrice = Integer.parseInt(discountedPrice.replaceAll("\\D", ""));
+			System.out.println("Discounted price: " + discPrice);
+			couponAmount = currentbagPrice - discPrice;
+			System.out.println("Coupon Amount: " + couponAmount);
+		}
+
+		// Check the Pincode
+		Thread.sleep(2000);
+		driver.findElementByXPath("//span[text()='Enter pin-code to know estimated delivery date.']").click();
+		wait.until(ExpectedConditions.elementToBeClickable(driver.findElementByXPath("//input[@name='pincode']")));
+		driver.findElementByXPath("//input[@name='pincode']").sendKeys("682001");
+		Thread.sleep(500);
+		driver.findElementByXPath("//button[text()='CONFIRM PINCODE']").click();
+		Thread.sleep(2000);
+
+		String pinCode = driver.findElementByXPath("//ul[@class='edd-message-success-details']/li").getText();
+		if (pinCode.contains("Expected Delivery")) {
+			System.out.println("Product available for pincode specified");
+		} else {
+			System.out.println("Product not available for pincode specified");
+		}
+
+		// Other info
+		Actions build = new Actions(driver);
+		build.moveToElement(driver.findElementByXPath("//div[text()='Other information']")).click().build().perform();
+		wait.until(ExpectedConditions
+				.elementToBeClickable(driver.findElementByXPath("//span[text()='Customer Care Address']")));
+		String custcareDetails = driver.findElementByXPath("//span[text()='Customer Care Address']").getText();
+		System.out.println("Customer Care Details:" + custcareDetails);
+
+		// Click on ADD TO BAG and then GO TO BAG
+		driver.findElementByXPath("//span[text()='ADD TO BAG']/ancestor::div[1]").click();
+		driver.findElementByXPath("//span[text()='GO TO BAG']/ancestor::div[1]");
+
+		Thread.sleep(1000);
+		if (driver.getTitle().contains("Shopping Bag")) {
+			System.out.println("Navigated to Shopping bag");
+		}
+
+		// Check the Order Total before apply coupon
+		Thread.sleep(2000);
+		String strOrderTotal = driver.findElementByXPath("//span[text()='Order Total']/following-sibling::span").getText();
+		String strOrderTot = strOrderTotal.replaceAll("\\D", "");
+		int total = Integer.parseInt(strOrderTot.substring(0, strOrderTot.length()-2));
+		System.out.println("Order total before applying coupon code: "+total);
+		
+		// Enter Coupon Code and Click Apply
+		driver.findElementById("couponCodeInput").sendKeys("EPIC");
+		driver.findElementByXPath("//button[text()='Apply']").click();
+		System.out.println("Coupon applied");
+		Thread.sleep(3000);
+		
+		//Verify the calculated price in Product details matches with Order Price in Summary Page
+		String priceinSummary = driver.findElementByXPath("//div[@class='net-price best-price-strip']").getText();
+		String discountedPrice = priceinSummary.replaceAll("[,a-zA-Z ]", "");
+		System.out.println("Discounted Price:"+discountedPrice);
+		String[] split = discountedPrice.split(".", 2);
+		String priceafterapplyCoupon = split[1];
+		double dpriceAfterCoupon = Double.parseDouble(priceafterapplyCoupon);
+		int priceAfterCoupon=(int)Math.round(dpriceAfterCoupon);
+		if(priceAfterCoupon==couponAmount)
+		{
+			System.out.println("Price after couple applied matches with coupon amount: "+priceAfterCoupon);
+		}
+		
+		// Click on Delete and Delete the item from Bag
+			driver.findElementByXPath("//div[@class='product-delete']/div").click();
+			Thread.sleep(1000);
+			driver.findElementByXPath("//div[@class='card-delete-button']//div[text()='DELETE']").click();
+			wait.until(ExpectedConditions.elementToBeClickable(driver.findElementByXPath("//div[@class='empty-cart']/p")));
+			String emptyCartMsg = driver.findElementByXPath("//div[@class='empty-cart']/p").getText();
+			if(emptyCartMsg.contains("Your Shopping Bag is Empty"))
+			{
+				System.out.println("Item deleted from bag");
+			}
+			
+		//Close browser
+			driver.close();
+
+		
+	}
+
+}
