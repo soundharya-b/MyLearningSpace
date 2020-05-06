@@ -1,0 +1,104 @@
+package selenium.practice;
+
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class HpStore {
+
+	public static void main(String[] args) throws InterruptedException {
+		
+		//Launch Browser
+		System.setProperty("webdriver.chrome.driver", "./Drivers/chromedriver.exe");
+		ChromeDriver driver = new ChromeDriver();
+		ChromeOptions option = new ChromeOptions();
+		option.addArguments("--disable notifications");
+		driver.manage().window().maximize();
+		driver.get("https://store.hp.com/in-en/");
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+
+		WebDriverWait wait = new WebDriverWait(driver, 10);
+		wait.until(ExpectedConditions.elementToBeClickable(driver.findElementByXPath("//button[@aria-label='Close']")));
+		driver.findElementByXPath("//button[@aria-label='Close']").click();
+
+		// MouseHover on laptops
+		WebElement mouseHover = driver.findElementByXPath("(//span[text()='Laptops'])[1]");
+		Actions builder = new Actions(driver);
+		builder.moveToElement(mouseHover).perform();
+
+		// Choose Pavilion
+		driver.findElementByXPath("(//span[text()='Pavilion'])[1]").click();
+
+		// Scrolling
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		js.executeScript("window.scrollBy(0,250)");
+		Thread.sleep(3000);
+
+		// Under SHOPPING OPTIONS --Processor --Select Intel Core i7
+		driver.findElementByXPath("(//span[text()='Processor'])[2]").click();
+		driver.findElementByXPath("//span[text()='Intel Core i7']").click();
+
+		// More than 1 TB
+		driver.findElementByXPath("//span[text()='More than 1 TB']").click();
+
+		// Sort by low to High Price
+		WebElement sortBy = driver.findElementByXPath("sorter");
+		Select drpDown = new Select(sortBy);
+		drpDown.selectByIndex(2);
+
+		// Select First One
+
+		String text = driver.findElementByXPath("(//strong[@class='product name product-item-name']/a)[1]").getText();
+		System.out.println("Product Name is " + text);
+		String price = driver.findElementByXPath("(//span[@data-price-type='finalPrice'])[1]").getText()
+				.replaceAll("\\D", "");
+		System.out.println("Price is " + price);
+
+		// 7) Click on Add to Cart
+		driver.findElementByXPath("(//span[text()='Add To Cart'])[1]").click();
+		Thread.sleep(5000);
+
+		// 8) Click on Shopping Cart icon --> Click on View and Edit Cart
+		driver.findElementByXPath("//div[@class=\"inside_closeButton fonticon icon-hclose\"]").click();
+		driver.findElementByXPath("//a[@title='Shopping Cart']").click();
+		driver.findElementByXPath("//span[text()='View and edit cart']").click();
+		Thread.sleep(10000);
+
+		// 9) Check the Shipping Option --> Check availability at Pincode
+		driver.findElementByXPath("//input[@name='pincode']").sendKeys("638002");
+		driver.findElementByXPath("//button[text()='check']").click();
+		Thread.sleep(5000);
+
+		// 10) Verify the order Total against the product price
+		String Total = driver.findElementByXPath("//td[@data-th='Order Total']/strong/span").getText().replaceAll("\\D",
+				"");
+		if (Total.equals(price)) {
+			System.out.println("Price are equal");
+
+			// 11) Proceed to Checkout if Order Total and Product Price matches
+			driver.findElementByXPath("//span[text()='Proceed to Checkout']").click();
+			Thread.sleep(3000);
+
+			// 12) Click on Place Order
+			driver.findElementByXPath("(//span[text()='Place Order'])[3]").click();
+
+			// 13) Capture the Error message and Print
+			System.out.println(
+					"Error message is " + driver.findElementByXPath("//div[@class='message notice']/span").getText());
+		} else {
+			System.out.println("Price are not equal");
+		}
+
+		// 14) Close Browser
+		driver.quit();
+
+	}
+
+}
