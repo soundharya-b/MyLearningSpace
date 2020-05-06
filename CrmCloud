@@ -1,0 +1,145 @@
+package selenium.practice;
+
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.Select;
+
+public class CrmCloud {
+
+	public static void main(String[] args) throws InterruptedException {
+		
+		
+		//Launch Browser
+		// for disabling the time out error in console
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+		System.setProperty("webdriver.chrome.driver", "./Drivers/chromedriver.exe");
+		ChromeDriver driver = new ChromeDriver();
+		driver.get("https://demo.1crmcloud.com/");
+		driver.manage().window().maximize();
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		String title = driver.getTitle();
+		if (title.contains("Snapdeal"))
+			System.out.println("Browser launched successfully: " + title);
+		else
+			System.err.println("Browser launch failed");
+		
+		//Enter UserName and Password as Admin	
+		driver.findElementById("login_user").sendKeys("admin");
+		driver.findElementById("login_pass").sendKeys("admin");
+		
+		//Theme as Claro Theme
+		WebElement drpdwn1 = driver.findElementById("login_theme");
+		Select drp1 = new Select(drpdwn1);
+		drp1.selectByVisibleText("Claro Theme");
+		
+		//Login
+		driver.findElementByXPath("//span[text()='Login']").click();
+		
+		//Click on Sales and Marketing
+		driver.findElementByXPath("//div[text()='Sales & Marketing']").click();
+		
+		//Click on CreateContact
+		driver.findElementByXPath("//div[text()='Create Contact']").click();
+		
+		// Select Title and type First name, Last Name, Email and Phone Numbers
+		Actions action = new Actions(driver);
+		action.click(driver.findElementById("DetailFormsalutation-input")).build().perform(); 
+		driver.findElementByXPath("//div[text()='Mrs.']").click();
+		
+		//First name
+		driver.findElementByXPath("//input[@id='DetailFormfirst_name-input']").sendKeys("Soundharya");
+		
+		//Last name
+		driver.findElementByXPath("//input[@id='DetailFormlast_name-input']").sendKeys("Baskar");
+		
+		//Email
+		driver.findElementByXPath("//input[@id='DetailFormemail1-input']").sendKeys("s.b@gmail.com");
+		
+		//phone number
+		driver.findElementByXPath("//input[@id='DetailFormphone_work-input']").sendKeys("123456789");
+
+		// Scroll Down
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		js.executeScript("window.scrollBy(0,500)");
+
+		//Select Lead source as Public Relation(Dropdown)
+		action.click(driver.findElementById("DetailFormlead_source-input")).build().perform();
+		driver.findElementByXPath("(//div[text()='Public Relations'])[2]").click();
+		
+		//Select Business Role as "Sales" (DropDown)
+		action.click(driver.findElementByXPath("DetailFormbusiness_role-input")).perform();
+		driver.findElementByXPath("//div[text()='Sales']").click();
+		
+		//Fill the Primary Address, City, State, Country and Postal Code and click Save
+		driver.findElementById("DetailFormprimary_address_street-input").sendKeys("ABC");
+		driver.findElementById("DetailFormprimary_address_city-input").sendKeys("Chennai");
+		driver.findElementById("DetailFormprimary_address_state-input").sendKeys("TamilNadu");
+		driver.findElementById("DetailFormprimary_address_country-input").sendKeys("India");
+		driver.findElementById("DetailFormprimary_address_postalcode-input").sendKeys("600088");
+		driver.findElementById("DetailForm_save2-label").click();
+		Thread.sleep(3000);
+		
+		//Mouse over on Today's Activities and click Meetings (Mouse Hover)
+		action.moveToElement(driver.findElementByXPath("//div[(contains(text(),'Today'))]")).build().perform(); 
+		//act.click(driver.findElementByXPath("//div[(contains(text(),'Meetings'))]")).build().perform(); 
+		driver.findElementByXPath("//div[(contains(text(),'Meetings'))]").click();
+		Thread.sleep(5000); 
+		
+		//Click Create Meeting
+		
+		driver.findElementByXPath("(//span[text()='Create'])[1]").click(); 
+		driver.findElementById("DetailFormname-input").sendKeys("Project Status");
+		Thread.sleep(2000);
+		
+		// Type Subject as "Project Status" , Status as "Planned" 
+		driver.findElementById("DetailFormstatus-input").click(); 
+		driver.findElementByXPath("(//div[text()='Planned'])[2]").click();
+		
+		//Start Date & Time as tomorrow 3 pm and Duration as 1hr
+		driver.findElementById("DetailFormdate_start-input").click(); 
+		driver.findElementByXPath("//div[@class='grid-cell number-cell text-right day inside current selected quiet responsive']/following::div[1]").click(); 
+		Thread.sleep(2000);
+		driver.findElementByXPath("//div[@id='DetailFormdate_start-calendar-text']//input[@class='input-text']").clear();
+		driver.findElementByXPath("//div[@id='DetailFormdate_start-calendar-text']//input[@class='input-text']")
+		.sendKeys("3:00pm", Keys.ENTER); 
+		driver.findElementById("DetailFormduration-time").clear(); 
+		driver.findElementById("DetailFormduration-time").sendKeys("1hr", Keys.TAB);
+		
+		// Click Add participants, add your created Contact name and click Save
+		driver.findElementByXPath("//span[contains(text(),'Add Participants')]").click(); 
+		driver.findElementByXPath("//div[@id='app-search-text']//input[@class='input-text']").sendKeys("Soundharya");
+		action.click(driver.findElementByXPath("//div[@id='app-search-list']//div[(contains(text(),'Soundharya'))]")).build().perform();
+		driver.findElementById("DetailForm_save2-label").click(); 
+		Thread.sleep(5000);
+		
+		// Go to Sales and Marketing-->Contacts
+		action.moveToElement(driver.findElementByXPath("//div[text()='Sales & Marketing']")).build().perform(); 
+		Thread.sleep(2000);
+		action.click(driver.findElementByXPath("//div[text()='Contacts']")).build().perform(); 
+		
+		
+		// search the lead Name and click the name from the result
+		driver.findElementById("filter_text").sendKeys("Soundharya"); 
+		Thread.sleep(3000); 
+		action.click(driver.findElementByXPath("//a[contains(text(),'Soundharya')]")).build().perform(); 
+		Thread.sleep(3000); 
+		
+		// Check weather the Meeting is assigned to the contact under Activities Section.
+		WebElement meetingRecord = driver.findElementByXPath("(//span[@id='subpanel-activities']/ancestor::div[@id='DetailForm-subpanels']//a[contains(text(),'Project Status')])[1]"); 
+		
+		if (meetingRecord.isDisplayed()) {
+			System.out.println("Meeting is assigned"); 
+		} else { 
+			System.out.println("Meeting is not available");
+		}
+		
+		//Close Browser
+		driver.close();
+	}
+
+}
