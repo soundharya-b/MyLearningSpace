@@ -1,0 +1,159 @@
+package selenium.practice;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+public class Azure {
+
+	public static void main(String[] args) throws InterruptedException {
+		//MAp Declaraion
+		HashMap<String, Object> chromePreference = new HashMap<String, Object>();
+
+		chromePreference.put("download.default_directory",
+				"C:\\Users\\HP\\Downloads\\ExportedEstimate.xlsx");
+
+		ChromeOptions options = new ChromeOptions();
+		options.setExperimentalOption("prefs", chromePreference);
+		System.setProperty("webdriver.chrome.driver", "./drivers/Chromedriver/chromedriver.exe");
+		System.setProperty("webdriver.chrome.silentOutput", "true");
+		options.addArguments("--disable-notifications");
+		ChromeDriver driver = new ChromeDriver(options);
+		driver.manage().window().maximize();
+		WebDriverWait wait = new WebDriverWait(driver, 30);
+		
+//	Launch Browser
+		driver.get("https://azure.microsoft.com/en-in/");
+		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		
+//	Click on Pricing
+		Thread.sleep(500);
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[text()='Pricing']")));
+		driver.findElementByXPath("//a[text()='Pricing']").click();
+		
+//	Click on Pricing Calculator
+		Thread.sleep(500);
+		wait.until(
+				ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[contains(text(),'Pricing calculator')]")));
+		driver.findElementByXPath("//a[contains(text(),'Pricing calculator')]").click();
+		
+//	Click on Containers
+		Thread.sleep(500);
+		wait.until(
+				ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@data-event-property='containers']")));
+		driver.findElementByXPath("//button[@data-event-property='containers']").click();
+		
+//	Select Container Instances
+		Thread.sleep(500);
+		wait.until(
+				ExpectedConditions.visibilityOfElementLocated(By.xpath("(//button[@title='Container Instances'])[2]")));
+		driver.findElementByXPath("(//button[@title='Container Instances'])[2]").click();
+		
+//  Click on Container Instance Added View
+		Thread.sleep(500);
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[text()='View']")));
+		driver.findElementByXPath("//a[text()='View']").click();
+		
+//	 Select Region as "South India"
+		Thread.sleep(500);
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("(//select[@aria-label='Region'])[1]")));
+		WebElement eleRegion = driver.findElementByXPath("(//select[@aria-label='Region'])[1]");
+		Select drpRegion = new Select(eleRegion);
+		drpRegion.selectByVisibleText("South India");
+		
+//	 Set the Duration as 180000 seconds
+		WebElement eleDuration = driver.findElementByXPath("//input[@aria-label='Seconds']");
+		eleDuration.clear();
+		eleDuration.sendKeys("80000");
+		
+//   Select the Memory as 4GB
+		WebElement eleMemory = driver.findElementByXPath("//select[@name='memory']");
+		Select drpMemory = new Select(eleMemory);
+		drpMemory.selectByVisibleText("4 GB");
+		
+//  Enable SHOW DEV/TEST PRICING
+		driver.findElementByXPath("//span[text()='Show Dev/Test Pricing']").click();
+		
+//	 Select Indian Rupee  as currency
+		Thread.sleep(500);
+		wait.until(
+				ExpectedConditions.visibilityOfElementLocated(By.xpath("//select[@class='select currency-dropdown']")));
+		WebElement selectCurr = driver.findElementByXPath("//select[@class='select currency-dropdown']");
+		Select Curr = new Select(selectCurr);
+		Curr.selectByVisibleText("Indian Rupee (₹)");
+		
+//	 Print the Estimated monthly price
+		Thread.sleep(500);
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("(//span[@class='numeric']/span)[6]")));
+		String monthEstim = driver.findElementByXPath("(//span[@class='numeric']/span)[6]").getText();
+		System.out.println("The monthly estimate is " + monthEstim);
+		
+//	 Click on Export to download the estimate as excel
+		driver.findElementByXPath("//button[@class='calculator-button button-transparent export-button']").click();
+		
+//	 Verify the downloaded file in the local folder
+		File file = new File(
+				"C:\\Users\\HP\\Downloads\\ExportedEstimate.xlsx");
+		Thread.sleep(1000);
+		if (file.exists()) {
+			System.out.println("Containers Instance file exists in the specied path");
+		}
+//	Navigate to Example Scenarios and Select CI/CD for Containers
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		WebElement eleEx = driver.findElementByXPath("//a[text()='Example Scenarios']");
+		js.executeScript("arguments[0].click();", eleEx);
+		Thread.sleep(500);
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[@title='CI/CD for Containers']")));
+		WebElement eleCICon = driver.findElementByXPath("//button[@title='CI/CD for Containers']");
+		js.executeScript("arguments[0].click();", eleCICon);
+		
+//	 Click Add to Estimate
+		Thread.sleep(500);
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//button[text()='Add to estimate']")));
+		WebElement estimAdd = driver.findElementByXPath("//button[text()='Add to estimate']");
+		js.executeScript("arguments[0].click();", estimAdd);
+		
+//	 Change the Currency as Indian Rupee
+		Thread.sleep(500);
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//select[@class='select currency-dropdown']")));
+		WebElement CurrCI = driver.findElementByXPath("//select[@class='select currency-dropdown']");
+		Select drpCurrCI = new Select(CurrCI);
+		drpCurrCI.selectByVisibleText("Indian Rupee (₹)");
+		
+//	Enable SHOW DEV/TEST PRICING
+		Thread.sleep(500);
+		wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//span[text()='Show Dev/Test Pricing']")));
+		WebElement eleDevPricing = driver.findElementByXPath("//span[text()='Show Dev/Test Pricing']");
+		js.executeScript("arguments[0].click();", eleDevPricing);
+		
+//  Export the Estimate
+		Thread.sleep(500);
+		wait.until(ExpectedConditions.elementToBeClickable(
+				By.xpath("//button[@class='calculator-button button-transparent export-button']")));
+		WebElement eleExport = driver
+				.findElementByXPath("//button[@class='calculator-button button-transparent export-button']");
+		js.executeScript("arguments[0].click();", eleExport);
+		Thread.sleep(2000);
+
+//	Verify the downloaded file in the local folder		
+		File fileCI = new File(
+				"C:\\Users\\HP\\Downloads\\ExportedEstimate.xlsx");
+		if (fileCI.exists()) {
+			System.out.println("CI CD Containers Estimate file exists in the specied path");
+		}
+
+//  Close Driver
+		driver.close();
+
+	}
+
+}
